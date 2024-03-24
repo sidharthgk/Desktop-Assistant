@@ -2,6 +2,7 @@ import speech_recognition as sr
 import pyttsx3
 import webbrowser
 
+# it converts text provided to speech and speaks it out for the user
 def speak(text):
     print(text)
     engine = pyttsx3.init()
@@ -11,6 +12,7 @@ def speak(text):
     engine.say(text)
     engine.runAndWait()
 
+# it takes in users command in audio and converts it to text
 def takeCommand():
     r = sr.Recognizer()
     with sr.Microphone() as source:
@@ -22,16 +24,18 @@ def takeCommand():
             query = r.recognize_google(audio, language='en-in')
             print("User said:", query)
             return query.lower()
-        except sr.UnknownValueError:
+        except sr.UnknownValueError: # this error occurs when its not able to identify words
             print("Sorry, I didn't catch that. Could you please repeat?")
             return takeCommand()  # Retry if speech is not understood
-        except sr.RequestError as e:
+        except sr.RequestError as e: # when its not able to reach google servers
             print("Could not request results; {0}".format(e))
-            return "Audio not clear"
+            return takeCommand()
 
+# this is used to execute basic queries 
 def execute(query):
-    if query == "stop":
+    if query == "stop": # the program ends if user says stop
         exit()
+    # dictionary is used to open different sites
     sites = {"google": "www.google.com", "youtube": "www.youtube.com", "wikipedia": "www.wikipedia.com",
              "instagram": "www.instagram.com", "twitter": "www.twitter.com", "linkedin": "www.linkedin.com"}
     for site, url in sites.items():
@@ -46,4 +50,10 @@ if __name__ == '__main__':
     speak("Hello, I'm JARVIS A.I. How can I help you?")
     while True:
         query = takeCommand()
-        execute(query)
+        if query.lower() == "hey jarvis":
+            execute(query)
+        else:
+            print("waiting")
+
+def greet() :
+    exit() # add greetings based on time here
