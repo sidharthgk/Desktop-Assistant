@@ -1,41 +1,40 @@
 import speech_recognition as sr
 import pyttsx3
 import webbrowser
+import pywhatkit
+import datetime
 
-# it converts text provided to speech and speaks it out for the user
 def speak(text):
     print(text)
     engine = pyttsx3.init()
     voices = engine.getProperty('voices')
     engine.setProperty('voice', voices[1].id)
-    engine.setProperty('rate', 110)
+    engine.setProperty('rate', 130)
     engine.say(text)
     engine.runAndWait()
 
-# it takes in users command in audio and converts it to text
 def takeCommand():
     r = sr.Recognizer()
     with sr.Microphone() as source:
         r.pause_threshold = 0.7
         print("Listening...")
         try:
-            audio = r.listen(source)  # could add timeout
+            audio = r.listen(source)
             print("Recognizing...")
-            query = r.recognize_google(audio, language='en-in')
+            query = r.recognize_google(audio)
             print("User said:", query)
             return query.lower()
-        except sr.UnknownValueError: # this error occurs when its not able to identify words
+        except sr.UnknownValueError:
             print("Sorry, I didn't catch that. Could you please repeat?")
-            return takeCommand()  # Retry if speech is not understood
-        except sr.RequestError as e: # when its not able to reach google servers
+            return takeCommand()
+        except sr.RequestError as e:
             print("Could not request results; {0}".format(e))
             return takeCommand()
 
-# this is used to execute basic queries 
 def execute(query):
-    if query == "stop": # the program ends if user says stop
+    if query == "stop":
         exit()
-    # dictionary is used to open different sites
+
     sites = {"google": "www.google.com", "youtube": "www.youtube.com", "wikipedia": "www.wikipedia.com",
              "instagram": "www.instagram.com", "twitter": "www.twitter.com", "linkedin": "www.linkedin.com"}
     for site, url in sites.items():
@@ -43,17 +42,40 @@ def execute(query):
             speak(f"Opening {site}")
             webbrowser.open(url)
             break
+
+    commands = {"hello": "hi how can i help you today",
+                "how are you": "I'm just a desktop assistant but thanks for asking",
+                "who created you": "I was created by Sid, Sruthy, Viswam, and Sreehari"}
+    for cmd, ans in commands.items():
+        if f"{cmd}" == query:
+            speak(f"{ans}")
+            break
+
+def playMusic():
+    speak("Which song would you like to play?")
+    try:
+        song = takeCommand()
+        pywhatkit.playonyt(song)
+        speak("Playing" + song)
+    except Exception as e:
+        print("Error:", str(e))
+        speak("Sorry, there was an error playing the song.")
+
+
+def greet():
+    current_time = datetime.datetime.now()
+    if 6 <= current_time.hour < 12:
+        speak("Good morning!")
+    elif 12 <= current_time.hour < 18:
+        speak("Good afternoon!")
     else:
-        speak("I'm sorry, I don't understand that command.")
+        speak("Good evening!")
 
 if __name__ == '__main__':
+    greet()
     speak("Hello, I'm JARVIS A.I. How can I help you?")
     while True:
         query = takeCommand()
-        if query.lower() == "hey jarvis":
-            execute(query)
-        else:
-            print("waiting")
-
-def greet() :
-    exit() # add greetings based on time here
+        execute(query)
+        if query == "play song":
+            playMusic()
